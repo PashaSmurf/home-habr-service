@@ -1,0 +1,11 @@
+[Unit]
+Description=Deployment web server
+After=network-online.target
+
+[Service]
+Type=simple
+RestartSec=3
+ExecStart=/root/remote/venv/bin/python3 /root/remote/server.py
+
+[Install]
+WantedBy=multi-user.target
