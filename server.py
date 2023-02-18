@@ -103,7 +103,7 @@ def kill_old_container(container_name: str) -> bool:
     return True
 
 
-def deploy_new_container(image_name: str, container_name: str, ports: dict = None):
+def deploy_new_container(image_name: str, container_name: str, ports: dict = None, volumes: list = None):
     try:
         # Пул последнего image из docker hub'a
         log.info(f'pull {image_name}, name={container_name}')
@@ -113,7 +113,7 @@ def deploy_new_container(image_name: str, container_name: str, ports: dict = Non
         log.debug('Old killed')
         # Запуск нового контейнера
         docker_client.containers.run(image=image_name, name=container_name, detach=True, ports=ports,
-                                     restart_policy={"Name": "always"})
+                                     restart_policy={"Name": "always"}, volumes=volumes)
     except Exception as e:
         log.error(f'Error while deploy container {container_name}, \n{e}')
         return {'status': False, 'error': str(e)}, 400
@@ -143,7 +143,8 @@ def MainHandler():
         log.debug(f'Recieved {request.data}')
         image_name, container_name = get_container_name(request.json)
         ports = request.json.get('ports') if request.json.get('ports') else None
-        result, status = deploy_new_container(image_name, container_name, ports)
+        volumes = request.json.get('volumes') if request.json.get('volumes') else None
+        result, status = deploy_new_container(image_name, container_name, ports, volumes)
         return jsonify(result), status
 
 
